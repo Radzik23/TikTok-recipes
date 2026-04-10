@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { auth } from "@/auth";
 
 // Importujemy komponenty do nawigacji i ikonki
 import Link from "next/link";
@@ -16,11 +17,14 @@ export const metadata: Metadata = {
   description: "Zapisuj i generuj przepisy z TikToka",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+  const addHref = session?.user ? "/add" : "/profile?next=/add";
+
   return (
     <html lang="pl">
       {/* 1. Tło całej strony i wyśrodkowanie aplikacji */}
@@ -42,7 +46,7 @@ export default function RootLayout({
             </Link>
             
             {/* Przycisk: Dodaj (Wielki Plus) */}
-            <Link href="/add" className="flex flex-col items-center justify-center w-full h-full relative group">
+            <Link href={addHref} className="flex flex-col items-center justify-center w-full h-full relative group">
               <div className="bg-[#4A5D4E] text-white p-3 rounded-full shadow-lg absolute -top-5 transition-transform group-hover:scale-105 group-active:scale-95">
                 <PlusCircle size={28} />
               </div>
