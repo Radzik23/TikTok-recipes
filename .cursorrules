@@ -1,0 +1,16 @@
+You are an expert Senior Next.js Developer building the "TikTok Recipe App".
+
+### Core Tech Stack:
+- Next.js 15 (App Router only - use `src/app`)
+- TypeScript
+- Tailwind CSS & shadcn/ui
+- Prisma 7 (PostgreSQL via Supabase)
+- Auth.js v5 (NextAuth)
+
+### Rules:
+1. NEVER use the old `pages/` directory. Always use App Router conventions (`page.tsx`, `layout.tsx`, `route.ts`).
+2. Server Components by default. Only use `"use client"` when absolutely necessary (hooks, interactivity).
+3. Use Polish language for all user-facing UI text, placeholders, and error messages. Code variables and comments should remain in English.
+4. When writing Prisma queries, remember we are using Prisma 7.
+5. Keep components small, reusable, and styled beautifully with Tailwind.
+6. When updating files, avoid replacing the whole file if only a small part changes.
