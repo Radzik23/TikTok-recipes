@@ -1,32 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, ChefHat, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getRecipeById } from "@/actions/recipe";
 
-// Sztuczne dane (na razie wyświetlamy to samo niezależnie od tego, co klikniemy)
-const RECIPE_DATA = {
-  title: "Spaghetti Bolognese z TikToka",
-  time: "20 min",
-  difficulty: "Łatwe",
-  image: "https://images.unsplash.com/photo-1622973536968-3ead9e780960?q=80&w=800&auto=format&fit=crop",
-  ingredients: [
-    "200g makaronu spaghetti",
-    "300g mięsa mielonego wołowego",
-    "1 średnia cebula",
-    "2 ząbki czosnku",
-    "Puszka krojonych pomidorów (400g)",
-    "Sól, pieprz, suszone oregano",
-    "Łyżka oliwy z oliwek",
-    "Tarty parmezan do posypania"
-  ],
-  steps: [
-    "Ugotuj makaron al dente w osolonej wodzie. Koniecznie zachowaj pół szklanki wody z gotowania do sosu.",
-    "Na rozgrzanej oliwie zeszklij drobno posiekaną cebulę, a pod koniec dodaj przeciśnięty przez praskę czosnek.",
-    "Dodaj mięso mielone na patelnię. Smaż na średnim ogniu, aż całkowicie zmieni kolor na brązowy.",
-    "Wlej pomidory z puszki, dodaj przyprawy. Zmniejsz ogień i duś pod przykryciem przez około 15 minut.",
-    "Połącz sos z ugotowanym makaronem na patelni. Dodaj odrobinę wody z makaronu, aby sos stał się jedwabisty i dobrze oblepił kluski."
-  ]
-};
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
 
 // W Next.js 15 parametry to Promise, więc musimy użyć async/await
 export default async function RecipePage({
@@ -35,6 +17,17 @@ export default async function RecipePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const recipe = await getRecipeById(id);
+
+  if (!recipe) {
+    notFound();
+  }
+
+  const ingredients = toStringArray(recipe.ingredients);
+  const steps = toStringArray(recipe.steps);
+  const imageUrl =
+    recipe.image ||
+    "https://images.unsplash.com/photo-1495521821757-a1efb6729352?q=80&w=1200&auto=format&fit=crop";
 
   return (
     // Używamy ujemnych marginesów (-mx-4 -mt-4), żeby zignorować padding z layoutu 
@@ -44,8 +37,8 @@ export default async function RecipePage({
       {/* Zdjęcie w tle i przyciski akcji na nim */}
       <div className="relative h-64 w-full">
         <Image
-          src={RECIPE_DATA.image}
-          alt={RECIPE_DATA.title}
+          src={imageUrl}
+          alt={recipe.title}
           fill
           className="object-cover"
           priority
@@ -73,10 +66,10 @@ export default async function RecipePage({
              <span className="bg-muted text-[10px] font-bold px-2.5 py-1 rounded-md text-muted-foreground tracking-wider">TIKTOK EDITION</span>
              <span className="bg-muted text-[10px] font-bold px-2.5 py-1 rounded-md text-muted-foreground tracking-wider">ITALIAN</span>
           </div>
-          <h1 className="text-[26px] font-bold leading-tight mb-4 tracking-tight">{RECIPE_DATA.title}</h1>
+          <h1 className="text-[26px] font-bold leading-tight mb-4 tracking-tight">{recipe.title}</h1>
           <div className="flex gap-5 text-sm text-muted-foreground font-medium">
-            <span className="flex items-center gap-1.5"><Clock size={18} className="text-[#4A5D4E]" /> {RECIPE_DATA.time}</span>
-            <span className="flex items-center gap-1.5"><ChefHat size={18} className="text-[#4A5D4E]" /> {RECIPE_DATA.difficulty}</span>
+            <span className="flex items-center gap-1.5"><Clock size={18} className="text-[#4A5D4E]" /> {recipe.time || "Brak czasu"}</span>
+            <span className="flex items-center gap-1.5"><ChefHat size={18} className="text-[#4A5D4E]" /> {recipe.difficulty || "Brak poziomu"}</span>
           </div>
         </div>
 
@@ -87,7 +80,7 @@ export default async function RecipePage({
             <span className="text-xs text-muted-foreground font-medium">Dla 2 osób</span>
           </div>
           <ul className="space-y-3.5">
-            {RECIPE_DATA.ingredients.map((item, idx) => (
+            {ingredients.map((item, idx) => (
               <li key={idx} className="flex items-start gap-3.5 text-[15px] leading-snug">
                 <div className="w-2 h-2 bg-[#4A5D4E] rounded-full mt-1.5 shrink-0"></div>
                 <span className="text-foreground/90">{item}</span>
@@ -100,7 +93,7 @@ export default async function RecipePage({
         <div>
           <h2 className="text-xl font-bold tracking-tight mb-5">Przygotowanie</h2>
           <div className="space-y-6">
-            {RECIPE_DATA.steps.map((step, idx) => (
+            {steps.map((step, idx) => (
               <div key={idx} className="flex gap-5">
                 <span className="text-4xl font-black text-muted-foreground/30 shrink-0 leading-none mt-1">
                   {String(idx + 1).padStart(2, '0')}

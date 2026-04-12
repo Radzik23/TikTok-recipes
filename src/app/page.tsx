@@ -3,35 +3,13 @@ import Link from "next/link";
 import { Heart, Search, Menu } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-// Sztuczne dane (Mock Data) do wizualizacji
-const MOCK_RECIPES = [
-  {
-    id: "1",
-    title: "Spaghetti Bolognese z TikToka",
-    time: "20 min",
-    difficulty: "Łatwe",
-    image: "https://images.unsplash.com/photo-1622973536968-3ead9e780960?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "2",
-    title: "Kremowe Curry z Kurczakiem",
-    time: "35 min",
-    difficulty: "Średnie",
-    image: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?q=80&w=800&auto=format&fit=crop",
-  },
-  {
-    id: "3",
-    title: "Puszyste Placuszki Twarogowe",
-    time: "15 min",
-    difficulty: "Łatwe",
-    image: "https://images.unsplash.com/photo-1528207776546-384cb1119b27?q=80&w=800&auto=format&fit=crop",
-  },
-];
+import { getRecipes } from "@/actions/recipe";
 
 const FILTERS = ["Wszystkie", "Obiad", "Desery", "Szybkie"];
 
-export default function Home() {
+export default async function Home() {
+  const recipes = await getRecipes();
+
   return (
     <div className="flex flex-col gap-6 pt-2 pb-6">
       
@@ -62,11 +40,27 @@ export default function Home() {
 
       {/* Lista przepisów */}
       <div className="flex flex-col gap-5 px-2">
-        {MOCK_RECIPES.map((recipe) => (
+        {recipes.length === 0 ? (
+          <Card className="rounded-3xl border border-dashed border-muted-foreground/20 bg-muted/30 shadow-none">
+            <CardContent className="p-8 text-center">
+              <h2 className="text-lg font-semibold mb-2">Brak przepisów</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Dodaj pierwszy przepis z TikToka, aby zobaczyć go na liście.
+              </p>
+              <Link
+                href="/add"
+                className="inline-flex items-center justify-center rounded-full bg-[#4A5D4E] px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#3a4a3d]"
+              >
+                Dodaj przepis
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          recipes.map((recipe) => (
           <Card key={recipe.id} className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow rounded-3xl bg-card">
             <div className="relative h-52 w-full">
               <Image 
-                src={recipe.image} 
+                src={recipe.image || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?q=80&w=1200&auto=format&fit=crop"} 
                 alt={recipe.title} 
                 fill 
                 className="object-cover"
@@ -83,7 +77,7 @@ export default function Home() {
               
               <div className="flex justify-between items-end mt-2">
                 <p className="text-sm text-muted-foreground font-medium flex items-center gap-1.5">
-                  {recipe.time} • {recipe.difficulty}
+                  {recipe.time || "Brak czasu"} • {recipe.difficulty || "Brak poziomu"}
                 </p>
                 {/* Przycisk przejścia do szczegółów */}
                 <Link href={`/recipe/${recipe.id}`}>
@@ -94,7 +88,8 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        ))
+        )}
       </div>
 
     </div>
